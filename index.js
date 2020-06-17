@@ -100,7 +100,8 @@ function topIndustryParser(ancestor, elementName, xpath) {
 
 function workScheduleParser(ancestor, elementName, rePattern) {
     const wesb = ancestor.querySelector(elementName);
-    return wesb.textContent.match(rePattern).groups.workschedule;
+    const wesbMatchable = wesb.textContent.replace(/[\s\t\r\n]+/gm,' ');
+    if (wesbMatchable.match(rePattern)) return wesbMatchable.match(rePattern)[3];
 }
 
 function parseXmlCompilation(myDom) {
@@ -110,6 +111,9 @@ function parseXmlCompilation(myDom) {
         e = {};
         e.title = textElement(occupation, 'title');
         console.log(e.title);
+
+        e.workSchedules = workScheduleParser(occupation, 'work_environment section_body', /<h3>( |<strong>)?Work [Ss]chedules?( |<\/strong>)?<\/h3> ?<p> ?(.+) ?<\/p>/)
+
         if (e.title === 'Military Careers') {
             return e;
         }
@@ -137,15 +141,14 @@ function parseXmlCompilation(myDom) {
 
         e.topIndustries = topIndustryParser(occupation, 'work_environment section_body', '//td');
 
-        e.workSchedules = workScheduleParser(occupation, 'work_environment section_body', /.h3.Work Schedules..h3.+.p.(?<workschedule>.+)..p./)
-
         return e;
     });
 
-    r.forEach(e => {
-        //console.log(`Job: ${e.title} Salary: ${e.medianPayAnnual} Growth Rating: ${e.employmentOutlookCode}`);
-        console.log(e.similarOccupations);
+    r.filter(e => !e.workSchedules).forEach(e => {
+        console.log(`Job: ${e.title} Salary: ${e.medianPayAnnual} Growth Rating: ${e.employmentOutlookCode}`);
+        //console.log(e.similarOccupations);
         //console.log(e.topIndustries);
+        console.log(e.workSchedules);
     });
 }
 
