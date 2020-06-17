@@ -98,6 +98,11 @@ function topIndustryParser(ancestor, elementName, xpath) {
     return industryDict;
 }
 
+function workScheduleParser(ancestor, elementName, rePattern) {
+    const wesb = ancestor.querySelector(elementName);
+    return wesb.textContent.match(rePattern).groups.workschedule;
+}
+
 function parseXmlCompilation(myDom) {
     const o = xpathSelect(myDom, '//occupation');
 
@@ -131,6 +136,8 @@ function parseXmlCompilation(myDom) {
         e.similarOccupations = similarOccupationsParser(occupation, 'similar_occupations section_body', '//td//h4');
 
         e.topIndustries = topIndustryParser(occupation, 'work_environment section_body', '//td');
+
+        e.workSchedules = workScheduleParser(occupation, 'work_environment section_body', /.h3.Work Schedules..h3.+.p.(?<workschedule>.+)..p./)
 
         return e;
     });
