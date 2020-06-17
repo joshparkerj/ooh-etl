@@ -14,10 +14,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "dom-parser": "^0.1.6",
-    "jsdom": "^16.2.2",
-    "query-selector": "^2.0.0",
-    "xmldom": "^0.3.0",
-    "xpath": "0.0.27"
+    "jsdom": "^16.2.2"
   }
 }
