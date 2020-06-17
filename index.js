@@ -73,15 +73,29 @@ function payParser(ancestor, elementName, xpath) {
 }
 
 function similarOccupationsParser(ancestor, elementName, xpath) {
-    return cdataParser(ancestor, elementName, xpath, 'similarOccupation', 'similarOccupations', (match, so) => {
-        if (!so.similarOccupation.list) {
-            so.similarOccupation.list = [];
-        }
+    const similarOccupations = [];
+    const so = ancestor.querySelector(elementName);
+    const soDoc = getDocument(so.textContent);
+    const soElements = xpathSelect(soDoc, xpath);
 
-        so.similarOccupation.list.push(match.textContent.trim());
+    for (i = 0; i < soElements.length; i++) {
+        similarOccupations.push(soElements[i].textContent.trim());
+    }
 
-        return so;
-    });
+    return similarOccupations;
+}
+
+function topIndustryParser(ancestor, elementName, xpath) {
+    const wesb = ancestor.querySelector(elementName);
+    const wesbDoc = getDocument(wesb.textContent);
+    const industryList = xpathSelect(wesbDoc, xpath);
+    industryDict = {};
+
+    for (i = 0; i < industryList.length; i += 2) {
+        industryDict[industryList[i].textContent] = industryList[i + 1].textContent.replace('%', '');
+    }
+
+    return industryDict;
 }
 
 function parseXmlCompilation(myDom) {
@@ -116,10 +130,16 @@ function parseXmlCompilation(myDom) {
 
         e.similarOccupations = similarOccupationsParser(occupation, 'similar_occupations section_body', '//td//h4');
 
+        e.topIndustries = topIndustryParser(occupation, 'work_environment section_body', '//td');
+
         return e;
     });
 
-    r.forEach(e => console.log(`Job: ${e.title} Salary: ${e.medianPayAnnual} Growth Rating: ${e.employmentOutlookCode}`));
+    r.forEach(e => {
+        //console.log(`Job: ${e.title} Salary: ${e.medianPayAnnual} Growth Rating: ${e.employmentOutlookCode}`);
+        console.log(e.similarOccupations);
+        //console.log(e.topIndustries);
+    });
 }
 
 JSDOM.fromFile('xml-compilation.xml')
