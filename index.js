@@ -89,7 +89,7 @@ function topIndustryParser(ancestor, elementName, xpath) {
     const wesb = ancestor.querySelector(elementName);
     const wesbDoc = getDocument(wesb.textContent);
     const industryList = xpathSelect(wesbDoc, xpath);
-    industryDict = {};
+    const industryDict = {};
 
     for (i = 0; i < industryList.length; i += 2) {
         industryDict[industryList[i].textContent] = industryList[i + 1].textContent.replace('%', '');
@@ -100,8 +100,27 @@ function topIndustryParser(ancestor, elementName, xpath) {
 
 function workScheduleParser(ancestor, elementName, rePattern) {
     const wesb = ancestor.querySelector(elementName);
-    const wesbMatchable = wesb.textContent.replace(/[\s\t\r\n]+/gm,' ');
-    if (wesbMatchable.match(rePattern)) return wesbMatchable.match(rePattern)[3];
+    const wesbMatchable = wesb.textContent.replace(/[\s\t\r\n]+/gm, ' ');
+    const match = wesbMatchable.match(rePattern);
+    if (match) return match[3];
+}
+
+function importantQualityParser(ancestor, elementName, rePattern, xpath) {
+    const htbosb = ancestor.querySelector(elementName);
+    const matchable = htbosb.textContent.replace(/[\s\t\r\n]+/gm, ' ');
+    const match = matchable.match(rePattern);
+    if (match) {
+        const iqDoc = getDocument(match[4].split('<h3>')[0]);
+        const importantQualities = xpathSelect(iqDoc, xpath);
+        const iqDict = {};
+
+        importantQualities.forEach(e => {
+            const splitPoint = e.textContent.indexOf('. ');
+            iqDict[e.textContent.slice(0,splitPoint)] = e.textContent.slice(splitPoint + 2);
+        });
+
+        return iqDict;
+    }
 }
 
 function parseXmlCompilation(myDom) {
@@ -113,6 +132,7 @@ function parseXmlCompilation(myDom) {
         console.log(e.title);
 
         e.workSchedules = workScheduleParser(occupation, 'work_environment section_body', /<h3>( |<strong>)?Work [Ss]chedules?( |<\/strong>)?<\/h3> ?<p> ?(.+) ?<\/p>/)
+        e.importantQualities = importantQualityParser(occupation, 'how_to_become_one section_body', /<h3>( |<strong>)?Important [Qq]ualities?(&nbsp;)?( |<\/strong>)?<\/h3>(.*)/, '//p')
 
         if (e.title === 'Military Careers') {
             return e;
@@ -144,11 +164,13 @@ function parseXmlCompilation(myDom) {
         return e;
     });
 
-    r.filter(e => !e.workSchedules).forEach(e => {
+    // Object.keys(e.importantQualities).some(k => k.length > 26)
+    r.filter(e => Object.keys(e.importantQualities).some(k => k.length > 26)).forEach(e => {
         console.log(`Job: ${e.title} Salary: ${e.medianPayAnnual} Growth Rating: ${e.employmentOutlookCode}`);
         //console.log(e.similarOccupations);
         //console.log(e.topIndustries);
-        console.log(e.workSchedules);
+        //console.log(e.workSchedules);
+        console.log(e.importantQualities);
     });
 }
 
