@@ -4,8 +4,9 @@
   "description": "generate java data from OOH xml file",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "test": "jest",
+    "start": "node index.js",
+    "lint": "npx eslint \"./*.js\""
   },
   "repository": {
     "type": "git",
@@ -15,5 +16,11 @@
   "license": "ISC",
   "dependencies": {
     "jsdom": "^16.2.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.12.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.4",
+    "jest": "^27.5.1"
   }
 }
